@@ -1,0 +1,68 @@
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-maple_hush_admin}
+      MYSQL_USER: ${MYSQL_USER:-maple_admin}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD in .env}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}
+      TZ: Asia/Shanghai
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 --silent"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 30s
+    restart: unless-stopped
+
+  redis:
+    image: redis:8-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-maple_hush_admin}?serverTimezone=Asia/Shanghai
+      DB_USERNAME: ${MYSQL_USER:-maple_admin}
+      DB_PASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD in .env}
+      SPRING_DATA_REDIS_HOST: redis
+      JWT_SECRET_BASE64: ${JWT_SECRET_BASE64:?Set JWT_SECRET_BASE64 in .env}
+      APP_AUTH_ALLOWED_ORIGIN: ${APP_AUTH_ALLOWED_ORIGIN:-http://localhost:8081}
+      APP_AUTH_COOKIE_SECURE: "false"
+      APP_BOOTSTRAP_ADMIN_AUTO_ENABLED: "true"
+      APP_BOOTSTRAP_ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      FLYWAY_ENABLED: "true"
+      OSS_ENABLED: ${OSS_ENABLED:-false}
+      OSS_ACCESS_KEY_ID: ${OSS_ACCESS_KEY_ID:-}
+      OSS_ACCESS_KEY_SECRET: ${OSS_ACCESS_KEY_SECRET:-}
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: scripts/deploy/Dockerfile
+    environment:
+      API_UPSTREAM: ${API_UPSTREAM:-http://backend:8080}
+    ports:
+      - "${FRONTEND_BIND_HOST:-127.0.0.1}:${FRONTEND_PORT:-8081}:8080"
+    restart: unless-stopped
+
+volumes:
+  mysql_data:

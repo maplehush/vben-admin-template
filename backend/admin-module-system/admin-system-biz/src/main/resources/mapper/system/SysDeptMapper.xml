@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.maplehush.admin.modules.system.dept.mapper.SysDeptMapper">
+    <select id="lock" resultType="com.maplehush.admin.modules.system.dept.entity.SysDept">
+        SELECT id, parent_id AS parentId, status FROM sys_dept WHERE id = #{id} FOR UPDATE
+    </select>
+    <select id="lockParent" resultType="java.lang.Long">
+        SELECT id FROM sys_dept WHERE id = #{id} FOR UPDATE
+    </select>
+    <select id="parentOf" resultType="java.lang.Long">
+        SELECT parent_id FROM sys_dept WHERE id = #{id}
+    </select>
+    <select id="countActiveUsers" resultType="long">
+        SELECT COUNT(*) FROM sys_user WHERE primary_dept_id = #{id} AND status = 1
+    </select>
+    <select id="countUsers" resultType="long">
+        SELECT COUNT(*) FROM sys_user WHERE primary_dept_id = #{id}
+    </select>
+    <select id="countScopeReferences" resultType="long">
+        SELECT COUNT(*) FROM sys_role_dept_scope WHERE dept_id = #{id}
+    </select>
+    <update id="setCode">
+        UPDATE sys_dept SET dept_code = #{code} WHERE id = #{id}
+    </update>
+    <update id="updateDetails">
+        UPDATE sys_dept SET parent_id = #{parentId}, dept_name = #{name},
+               sort_order = #{sortOrder}, status = #{status}, remark = #{remark}
+        WHERE id = #{id}
+    </update>
+</mapper>

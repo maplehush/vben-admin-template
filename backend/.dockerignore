@@ -1,0 +1,10 @@
+**/target/
+.idea/
+.mvn/
+docs/
+maintenance/
+.env
+.env.*
+*.log
+*.iml
+.DS_Store

@@ -1,0 +1,22 @@
+# Local and generated files
+**/.DS_Store
+**/node_modules/
+**/target/
+**/dist/
+**/dist-ssr/
+**/.turbo/
+**/.idea/
+**/.cache/
+**/coverage/
+**/*.log
+**/dist.zip
+**/dist.tar
+**/dist.war
+
+# Local credentials and machine-specific configuration
+**/.env.local
+**/.env.*.local
+backend/.env.oss.local
+.env.docker
+/.env
+/frontend/.env

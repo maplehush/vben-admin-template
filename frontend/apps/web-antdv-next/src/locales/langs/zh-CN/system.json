@@ -1,0 +1,33 @@
+{
+  "title": "系统管理",
+  "user": {
+    "title": "用户管理"
+  },
+  "role": {
+    "title": "角色管理"
+  },
+  "dept": {
+    "title": "部门管理"
+  },
+  "menu": {
+    "title": "菜单管理"
+  },
+  "permission": {
+    "title": "接口权限"
+  },
+  "session": {
+    "title": "在线会话"
+  },
+  "log": {
+    "title": "日志管理"
+  },
+  "loginLog": {
+    "title": "登录日志"
+  },
+  "operationLog": {
+    "title": "操作日志"
+  },
+  "dict": {
+    "title": "字典管理"
+  }
+}

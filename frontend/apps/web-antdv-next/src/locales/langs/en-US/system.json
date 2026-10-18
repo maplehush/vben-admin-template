@@ -1,0 +1,33 @@
+{
+  "title": "System",
+  "user": {
+    "title": "Users"
+  },
+  "role": {
+    "title": "Roles"
+  },
+  "dept": {
+    "title": "Departments"
+  },
+  "menu": {
+    "title": "Menus"
+  },
+  "permission": {
+    "title": "API Permissions"
+  },
+  "session": {
+    "title": "Sessions"
+  },
+  "log": {
+    "title": "Logs"
+  },
+  "loginLog": {
+    "title": "Login Logs"
+  },
+  "operationLog": {
+    "title": "Operation Logs"
+  },
+  "dict": {
+    "title": "Dictionaries"
+  }
+}

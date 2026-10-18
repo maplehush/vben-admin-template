@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.maplehush.admin.modules.system.audit.mapper.AuditLogMapper">
+    <resultMap id="operationLog" type="com.maplehush.admin.modules.system.audit.vo.OperationLogVO">
+        <constructor>
+            <idArg column="id" javaType="java.lang.Long"/>
+            <arg column="username" javaType="java.lang.String"/>
+            <arg column="actionCode" javaType="java.lang.String"/>
+            <arg column="targetType" javaType="java.lang.String"/>
+            <arg column="targetId" javaType="java.lang.String"/>
+            <arg column="success" javaType="_boolean"/>
+            <arg column="ipAddress" javaType="java.lang.String"/>
+            <arg column="occurTime" javaType="java.time.LocalDateTime"/>
+        </constructor>
+    </resultMap>
+    <sql id="loginWhere">
+        <where>
+            <if test="!filter.all">
+                l.user_id IN (SELECT id FROM sys_user WHERE id = #{filter.actorId}
+                <if test="filter.deptIds != null and !filter.deptIds.isEmpty()">
+                    OR primary_dept_id IN
+                    <foreach collection="filter.deptIds" item="deptId" open="(" separator="," close=")">#{deptId}</foreach>
+                </if>)
+            </if>
+            <if test="filter.username != null">AND l.username = #{filter.username}</if>
+            <if test="filter.startTime != null">AND l.occur_time &gt;= #{filter.startTime}</if>
+            <if test="filter.endTime != null">AND l.occur_time &lt;= #{filter.endTime}</if>
+            <if test="filter.success != null">AND l.success = #{filter.success}</if>
+        </where>
+    </sql>
+    <select id="countLogin" resultType="long">
+        SELECT COUNT(*) FROM sys_login_log l <include refid="loginWhere"/>
+    </select>
+    <select id="listLogin" resultType="com.maplehush.admin.modules.system.audit.entity.SysLoginLog">
+        SELECT l.id, l.username, l.success, l.failure_reason AS failureReason,
+               l.ip_address AS ipAddress, l.user_agent AS userAgent, l.occur_time AS occurTime
+        FROM sys_login_log l <include refid="loginWhere"/>
+        ORDER BY l.occur_time DESC, l.id DESC LIMIT #{limit} OFFSET #{offset}
+    </select>
+    <sql id="operationWhere">
+        <where>
+            <if test="!filter.all">
+                l.actor_user_id IN (SELECT id FROM sys_user WHERE id = #{filter.actorId}
+                <if test="filter.deptIds != null and !filter.deptIds.isEmpty()">
+                    OR primary_dept_id IN
+                    <foreach collection="filter.deptIds" item="deptId" open="(" separator="," close=")">#{deptId}</foreach>
+                </if>)
+            </if>
+            <if test="filter.username != null">AND u.username = #{filter.username}</if>
+            <if test="filter.startTime != null">AND l.occur_time &gt;= #{filter.startTime}</if>
+            <if test="filter.endTime != null">AND l.occur_time &lt;= #{filter.endTime}</if>
+            <if test="filter.actionCode != null">AND l.action_code = #{filter.actionCode}</if>
+        </where>
+    </sql>
+    <select id="countOperation" resultType="long">
+        SELECT COUNT(*) FROM sys_operation_log l LEFT JOIN sys_user u ON u.id = l.actor_user_id
+        <include refid="operationWhere"/>
+    </select>
+    <select id="listOperation" resultMap="operationLog">
+        SELECT l.id, u.username, l.action_code AS actionCode, l.target_type AS targetType,
+               l.target_id AS targetId, l.success, l.ip_address AS ipAddress,
+               l.occur_time AS occurTime
+        FROM sys_operation_log l LEFT JOIN sys_user u ON u.id = l.actor_user_id
+        <include refid="operationWhere"/>
+        ORDER BY l.occur_time DESC, l.id DESC LIMIT #{limit} OFFSET #{offset}
+    </select>
+</mapper>

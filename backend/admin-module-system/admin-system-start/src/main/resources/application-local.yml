@@ -1,0 +1,30 @@
+spring:
+  config:
+    import:
+      - optional:file:./.env.local[.properties]
+      - optional:file:./backend/.env.local[.properties]
+      - optional:file:./.env.oss.local[.properties]
+      - optional:file:./backend/.env.oss.local[.properties]
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/maple_hush_admin?serverTimezone=Asia/Shanghai
+    username: root
+    password: ${DB_PASSWORD}
+  data:
+    redis:
+      password: ${DB_PASSWORD}
+
+app:
+  docs:
+    enabled: true
+  auth:
+    jwt-secret-base64: ${JWT_SECRET_BASE64}
+    cookie-secure: false
+    allowed-origins:
+      - http://localhost:5999
+      - http://127.0.0.1:5999
+      - http://localhost:18080
+      - http://127.0.0.1:18080
+
+springdoc:
+  api-docs:
+    enabled: true

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.maplehush.admin.modules.system.auth.mapper.SysSessionMapper">
+    <resultMap id="sessionView" type="com.maplehush.admin.modules.system.auth.vo.SessionVO">
+        <constructor>
+            <idArg column="id" javaType="java.lang.Long"/>
+            <arg column="username" javaType="java.lang.String"/>
+            <arg column="device_info" javaType="java.lang.String"/>
+            <arg column="ip_address" javaType="java.lang.String"/>
+            <arg column="create_time" javaType="java.time.LocalDateTime"/>
+            <arg column="expire_time" javaType="java.time.LocalDateTime"/>
+            <arg column="is_current" javaType="_boolean"/>
+        </constructor>
+    </resultMap>
+
+    <sql id="activeSessions">
+        FROM sys_session s JOIN sys_user u ON u.id = s.user_id
+        WHERE s.revoke_time IS NULL AND s.expire_time &gt; #{now}
+    </sql>
+
+    <select id="listOwn" resultMap="sessionView">
+        SELECT s.id, u.username, s.device_info, s.ip_address, s.create_time, s.expire_time,
+               CASE WHEN s.id = #{currentSessionId} THEN TRUE ELSE FALSE END AS is_current
+        <include refid="activeSessions"/>
+        AND s.user_id = #{userId}
+        ORDER BY s.create_time DESC, s.id DESC
+    </select>
+
+    <select id="countActive" resultType="long">
+        SELECT COUNT(*) <include refid="activeSessions"/>
+        <if test="username != null">AND u.username = #{username}</if>
+    </select>
+
+    <select id="listActive" resultMap="sessionView">
+        SELECT s.id, u.username, s.device_info, s.ip_address, s.create_time, s.expire_time,
+               FALSE AS is_current
+        <include refid="activeSessions"/>
+        <if test="username != null">AND u.username = #{username}</if>
+        ORDER BY s.create_time DESC, s.id DESC LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <update id="revokeOwn">
+        UPDATE sys_session SET revoke_time = #{now}
+        WHERE id = #{sessionId} AND user_id = #{userId}
+          AND revoke_time IS NULL AND expire_time &gt; #{now}
+    </update>
+
+    <update id="revokeManaged">
+        UPDATE sys_session SET revoke_time = #{now}
+        WHERE id = #{sessionId} AND revoke_time IS NULL AND expire_time &gt; #{now}
+        <if test="protectSuperAdmin">
+            AND NOT EXISTS (
+                SELECT 1 FROM sys_user_role ur
+                JOIN sys_role r ON r.id = ur.role_id
+                WHERE ur.user_id = sys_session.user_id
+                  AND r.role_code = 'super_admin' AND r.status = 1
+            )
+        </if>
+    </update>
+
+    <select id="isProtectedTarget" resultType="boolean">
+        SELECT EXISTS (
+            SELECT 1 FROM sys_session s
+            JOIN sys_user_role ur ON ur.user_id = s.user_id
+            JOIN sys_role r ON r.id = ur.role_id
+            WHERE s.id = #{sessionId} AND r.role_code = 'super_admin' AND r.status = 1
+        )
+    </select>
+
+    <update id="revokeAllForUser">
+        UPDATE sys_session SET revoke_time = #{now}
+        WHERE user_id = #{userId} AND revoke_time IS NULL
+    </update>
+
+    <update id="revokeByHash">
+        UPDATE sys_session SET revoke_time = #{now}
+        WHERE refresh_token_hash = #{hash} AND revoke_time IS NULL
+    </update>
+
+    <select id="lockByRefreshHash" resultType="com.maplehush.admin.modules.system.auth.mapper.RefreshSessionState">
+        SELECT s.id, s.user_id AS userId, s.expire_time AS expireTime,
+               s.revoke_time AS revokeTime, u.status
+        FROM sys_session s JOIN sys_user u ON u.id = s.user_id
+        WHERE s.refresh_token_hash = #{hash} FOR UPDATE
+    </select>
+</mapper>

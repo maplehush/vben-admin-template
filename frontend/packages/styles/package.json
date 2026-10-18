@@ -1,0 +1,30 @@
+{
+  "name": "@vben/styles",
+  "version": "5.8.0",
+  "homepage": "https://github.com/vbenjs/vue-vben-admin",
+  "bugs": "https://github.com/vbenjs/vue-vben-admin/issues",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vbenjs/vue-vben-admin.git",
+    "directory": "packages/styles"
+  },
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./antdv-next": {
+      "types": "./src/style-exports.d.ts",
+      "default": "./src/antdv-next/index.css"
+    },
+    "./global": {
+      "types": "./src/style-exports.d.ts",
+      "default": "./src/global/index.scss"
+    }
+  },
+  "dependencies": {
+    "@vben-core/design": "workspace:*"
+  }
+}

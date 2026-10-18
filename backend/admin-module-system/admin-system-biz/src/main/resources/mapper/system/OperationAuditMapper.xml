@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.maplehush.admin.modules.system.audit.mapper.OperationAuditMapper">
+    <insert id="insert">
+        INSERT INTO sys_operation_log (actor_user_id, action_code, target_type,
+                                       target_id, success, request_id, ip_address)
+        VALUES (#{actor}, #{action}, #{targetType}, #{target}, 1, #{requestId}, #{ipAddress})
+    </insert>
+</mapper>

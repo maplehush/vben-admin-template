@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.maplehush.admin.modules.system.role.mapper.SysRoleMapper">
+    <select id="lockRoleCode" resultType="java.lang.String">
+        SELECT role_code FROM sys_role WHERE id = #{id} FOR UPDATE
+    </select>
+    <select id="countRole" resultType="long">SELECT COUNT(*) FROM sys_role WHERE id = #{id}</select>
+    <select id="countAssignedUsers" resultType="long">SELECT COUNT(*) FROM sys_user_role WHERE role_id = #{id}</select>
+    <sql id="ids">
+        <foreach collection="ids" item="id" open="(" separator="," close=")">#{id}</foreach>
+    </sql>
+    <select id="countActiveMenus" resultType="long">
+        SELECT COUNT(*) FROM sys_menu WHERE id IN <include refid="ids"/> AND status = 1
+    </select>
+    <select id="countActivePermissions" resultType="long">
+        SELECT COUNT(*) FROM sys_permission WHERE id IN <include refid="ids"/> AND status = 1
+    </select>
+    <select id="countActiveDepartments" resultType="long">
+        SELECT COUNT(*) FROM sys_dept WHERE id IN <include refid="ids"/> AND status = 1
+    </select>
+    <select id="menuIds" resultType="java.lang.Long">
+        SELECT menu_id FROM sys_role_menu WHERE role_id = #{id} ORDER BY menu_id
+    </select>
+    <select id="permissionIds" resultType="java.lang.Long">
+        SELECT permission_id FROM sys_role_permission WHERE role_id = #{id} ORDER BY permission_id
+    </select>
+    <select id="departmentIds" resultType="java.lang.Long">
+        SELECT dept_id FROM sys_role_dept_scope WHERE role_id = #{id} ORDER BY dept_id
+    </select>
+    <select id="dataScopeType" resultType="java.lang.String">
+        SELECT data_scope_type FROM sys_role WHERE id = #{id}
+    </select>
+    <update id="updateDetails">
+        UPDATE sys_role SET role_name = #{name}, description = #{description}, status = #{status}
+        WHERE id = #{id}
+    </update>
+    <update id="updateDataScope">
+        UPDATE sys_role SET data_scope_type = #{type} WHERE id = #{id}
+    </update>
+    <delete id="deleteMenus">DELETE FROM sys_role_menu WHERE role_id = #{id}</delete>
+    <delete id="deletePermissions">DELETE FROM sys_role_permission WHERE role_id = #{id}</delete>
+    <delete id="deleteDepartments">DELETE FROM sys_role_dept_scope WHERE role_id = #{id}</delete>
+    <insert id="insertMenu">INSERT INTO sys_role_menu (role_id, menu_id) VALUES (#{roleId}, #{menuId})</insert>
+    <insert id="insertPermission">INSERT INTO sys_role_permission (role_id, permission_id) VALUES (#{roleId}, #{permissionId})</insert>
+    <insert id="insertDepartment">INSERT INTO sys_role_dept_scope (role_id, dept_id) VALUES (#{roleId}, #{deptId})</insert>
+</mapper>

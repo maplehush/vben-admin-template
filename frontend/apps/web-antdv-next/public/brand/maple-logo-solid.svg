@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Maple Hush logo">
+  <defs>
+    <linearGradient id="maple" x1="22" y1="35" x2="176" y2="166" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#E9284B"/>
+      <stop offset="0.52" stop-color="#F34B31"/>
+      <stop offset="1" stop-color="#F59A35"/>
+    </linearGradient>
+  </defs>
+  <path fill="url(#maple)" d="M100 16c-3 0-5 3-7 6L75 52c-3 5-6 6-11 4l-11-4c-5-2-8 1-7 6l8 31c1 5-2 7-6 4L27 79c-4-3-8-1-9 3l-2 5c-1 3-3 4-6 3-5-2-8 2-6 7l13 30c2 5 0 8-4 10-4 2-4 6 0 9l30 19c4 2 4 5 1 8l-7 6c-4 4-2 8 4 8l39-7c4-1 7 0 11 3l9 7 9-7c4-3 7-4 11-3l39 7c6 0 8-4 4-8l-7-6c-3-3-3-6 1-8l30-19c4-3 4-7 0-9-4-2-6-5-4-10l13-30c2-5-1-9-6-7-3 1-5 0-6-3l-2-5c-1-4-5-6-9-3l-21 14c-4 3-7 1-6-4l8-31c1-5-2-8-7-6l-11 4c-5 2-8 1-11-4l-18-30c-2-3-4-6-7-6Z"/>
+</svg>

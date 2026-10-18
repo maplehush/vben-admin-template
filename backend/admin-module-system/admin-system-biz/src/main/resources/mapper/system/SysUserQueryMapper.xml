@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.maplehush.admin.modules.system.user.mapper.SysUserQueryMapper">
+    <resultMap id="userSummary" type="com.maplehush.admin.modules.system.user.vo.UserSummaryVO">
+        <constructor>
+            <idArg column="id" javaType="java.lang.Long"/>
+            <arg column="username" javaType="java.lang.String"/>
+            <arg column="realName" javaType="java.lang.String"/>
+            <arg column="remark" javaType="java.lang.String"/>
+            <arg column="email" javaType="java.lang.String"/>
+            <arg column="phone" javaType="java.lang.String"/>
+            <arg column="primaryDeptId" javaType="java.lang.Long"/>
+            <arg column="primaryDeptName" javaType="java.lang.String"/>
+            <arg column="status" javaType="java.lang.Integer"/>
+            <arg column="createTime" javaType="java.time.LocalDateTime"/>
+            <arg column="systemAccount" javaType="_boolean"/>
+        </constructor>
+    </resultMap>
+    <resultMap id="userDetail" type="com.maplehush.admin.modules.system.user.vo.UserDetailVO">
+        <constructor>
+            <idArg column="id" javaType="java.lang.Long"/>
+            <arg column="username" javaType="java.lang.String"/>
+            <arg column="realName" javaType="java.lang.String"/>
+            <arg column="remark" javaType="java.lang.String"/>
+            <arg column="email" javaType="java.lang.String"/>
+            <arg column="phone" javaType="java.lang.String"/>
+            <arg column="primaryDeptId" javaType="java.lang.Long"/>
+            <arg column="primaryDeptName" javaType="java.lang.String"/>
+            <arg column="status" javaType="java.lang.Integer"/>
+            <arg column="createTime" javaType="java.time.LocalDateTime"/>
+            <arg column="systemAccount" javaType="_boolean"/>
+            <arg column="avatarUrl" javaType="java.lang.String"/>
+            <arg column="homePath" javaType="java.lang.String"/>
+            <arg column="updateTime" javaType="java.time.LocalDateTime"/>
+        </constructor>
+    </resultMap>
+    <sql id="userWhere">
+        <where>
+            <if test="!filter.all">
+                (u.id = #{filter.actorId}
+                <if test="filter.deptIds != null and !filter.deptIds.isEmpty()">
+                    OR u.primary_dept_id IN
+                    <foreach collection="filter.deptIds" item="deptId" open="(" separator="," close=")">#{deptId}</foreach>
+                </if>)
+            </if>
+            <if test="filter.username != null">AND u.username LIKE #{filter.username} ESCAPE '!'</if>
+            <if test="filter.realName != null">AND u.real_name LIKE #{filter.realName} ESCAPE '!'</if>
+            <if test="filter.remark != null">AND u.remark LIKE #{filter.remark} ESCAPE '!'</if>
+            <if test="filter.deptId != null">AND u.primary_dept_id = #{filter.deptId}</if>
+            <if test="filter.userId != null">AND u.id = #{filter.userId}</if>
+            <if test="filter.status != null">AND u.status = #{filter.status}</if>
+            <if test="filter.startTime != null">AND u.create_time &gt;= #{filter.startTime}</if>
+            <if test="filter.endTime != null">AND u.create_time &lt; #{filter.endTime}</if>
+        </where>
+    </sql>
+    <sql id="userColumns">
+        u.id, u.username, u.real_name AS realName, u.remark, u.email, u.phone,
+        u.primary_dept_id AS primaryDeptId, d.dept_name AS primaryDeptName,
+        u.status,
+        u.create_time AS createTime,
+        EXISTS (SELECT 1 FROM sys_user_role ur JOIN sys_role r ON r.id = ur.role_id
+                WHERE ur.user_id = u.id AND r.role_code = 'super_admin') AS systemAccount,
+        u.avatar_url AS avatarUrl, u.home_path AS homePath, u.update_time AS updateTime
+    </sql>
+    <select id="countUsers" resultType="long">
+        SELECT COUNT(*) FROM sys_user u <include refid="userWhere"/>
+    </select>
+    <select id="listUsers" resultMap="userSummary">
+        SELECT <include refid="userColumns"/>
+        FROM sys_user u LEFT JOIN sys_dept d ON d.id = u.primary_dept_id
+        <include refid="userWhere"/> ORDER BY u.id DESC LIMIT #{limit} OFFSET #{offset}
+    </select>
+    <select id="findUser" resultMap="userDetail">
+        SELECT <include refid="userColumns"/>
+        FROM sys_user u LEFT JOIN sys_dept d ON d.id = u.primary_dept_id
+        <include refid="userWhere"/>
+    </select>
+    <select id="countUser" resultType="long">SELECT COUNT(*) FROM sys_user WHERE id = #{id}</select>
+    <select id="userRoleIds" resultType="java.lang.Long">
+        SELECT role_id FROM sys_user_role WHERE user_id = #{id} ORDER BY role_id
+    </select>
+</mapper>

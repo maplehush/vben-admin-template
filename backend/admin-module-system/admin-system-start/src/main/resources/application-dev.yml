@@ -1,0 +1,7 @@
+app:
+  docs:
+    enabled: true
+
+springdoc:
+  api-docs:
+    enabled: true

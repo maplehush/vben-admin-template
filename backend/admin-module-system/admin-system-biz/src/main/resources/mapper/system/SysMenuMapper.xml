@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.maplehush.admin.modules.system.menu.mapper.SysMenuMapper">
+    <select id="lock" resultType="com.maplehush.admin.modules.system.menu.entity.SysMenu">
+        SELECT id, parent_id AS parentId, menu_type AS menuType, menu_key AS menuKey,
+               auth_code AS authCode, status FROM sys_menu WHERE id = #{id} FOR UPDATE
+    </select>
+    <select id="lockParent" resultType="com.maplehush.admin.modules.system.menu.entity.SysMenu">
+        SELECT id, menu_type AS menuType, status FROM sys_menu WHERE id = #{id} FOR UPDATE
+    </select>
+    <select id="parentOf" resultType="java.lang.Long">
+        SELECT parent_id FROM sys_menu WHERE id = #{id}
+    </select>
+    <select id="lockPermissionNamespace" resultType="java.lang.Long">
+        SELECT id FROM sys_role WHERE role_code = 'super_admin' FOR UPDATE
+    </select>
+    <select id="countRoleReferences" resultType="long">
+        SELECT COUNT(*) FROM sys_role_menu WHERE menu_id = #{id}
+    </select>
+    <select id="countPermissionReferences" resultType="long">
+        SELECT COUNT(*) FROM sys_permission WHERE menu_id = #{id}
+    </select>
+    <select id="countPermissionCode" resultType="long">
+        SELECT COUNT(*) FROM sys_permission WHERE permission_code = #{code}
+    </select>
+    <update id="updateCore">
+        UPDATE sys_menu SET title_key = #{title}, icon = #{icon}, sort_order = #{sortOrder}
+        WHERE id = #{id}
+    </update>
+    <update id="updateDetails">
+        UPDATE sys_menu SET parent_id = #{parentId}, route_name = #{routeName},
+               route_path = #{routePath}, component = #{component},
+               redirect_path = #{redirectPath}, title_key = #{titleKey}, icon = #{icon},
+               sort_order = #{sortOrder}, route_meta = #{routeMeta}, status = #{status}
+        WHERE id = #{id}
+    </update>
+</mapper>

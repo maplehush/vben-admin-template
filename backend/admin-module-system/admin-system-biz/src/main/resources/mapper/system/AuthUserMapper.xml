@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.maplehush.admin.modules.system.auth.mapper.AuthUserMapper">
+    <select id="lockEnabledSuperAdminRole" resultType="java.lang.Long">
+        SELECT id FROM sys_role WHERE role_code = 'super_admin' AND status = 1 FOR UPDATE
+    </select>
+    <insert id="assignRole">
+        INSERT INTO sys_user_role (user_id, role_id) VALUES (#{userId}, #{roleId})
+    </insert>
+    <select id="findForLogin" resultType="com.maplehush.admin.modules.system.user.entity.SysUser">
+        SELECT id, password_hash AS passwordHash, status FROM sys_user WHERE username = #{username}
+    </select>
+    <select id="findAuthenticatedUser" resultType="com.maplehush.admin.modules.system.auth.mapper.AuthenticatedSessionState">
+        SELECT u.id AS userId, s.id AS sessionId, u.status,
+               u.must_change_password AS mustChangePassword,
+               s.expire_time AS expireTime, s.revoke_time AS revokeTime
+        FROM sys_user u JOIN sys_session s ON s.user_id = u.id
+        WHERE u.id = #{userId} AND s.id = #{sessionId}
+    </select>
+    <select id="lockPasswordHash" resultType="java.lang.String">
+        SELECT password_hash FROM sys_user WHERE id = #{userId} FOR UPDATE
+    </select>
+    <update id="changePassword">
+        UPDATE sys_user SET password_hash = #{hash}, must_change_password = 0,
+               password_change_time = #{now} WHERE id = #{userId}
+    </update>
+    <update id="recordLogin">
+        UPDATE sys_user SET last_login_time = #{now} WHERE id = #{userId}
+    </update>
+</mapper>

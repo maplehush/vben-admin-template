@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.maplehush.admin.modules.system.permission.mapper.SysPermissionMapper">
+    <sql id="filter">
+        <if test="pattern != null">WHERE permission_code LIKE #{pattern}</if>
+    </sql>
+    <select id="countFiltered" resultType="long">
+        SELECT COUNT(*) FROM sys_permission <include refid="filter"/>
+    </select>
+    <select id="listFiltered" resultType="com.maplehush.admin.modules.system.permission.entity.SysPermission">
+        SELECT id, menu_id AS menuId, permission_key AS permissionKey,
+               permission_code AS permissionCode, title_key AS titleKey,
+               sort_order AS sortOrder, status, create_time AS createTime,
+               update_time AS updateTime
+        FROM sys_permission <include refid="filter"/>
+        ORDER BY id LIMIT #{limit} OFFSET #{offset}
+    </select>
+    <select id="countRoleGrants" resultType="long">
+        SELECT COUNT(*) FROM sys_role_permission WHERE permission_id = #{id}
+    </select>
+    <select id="countEligibleMenu" resultType="long">
+        SELECT COUNT(*) FROM sys_menu WHERE id = #{id}
+          AND menu_type IN ('CATALOG','MENU') AND status = 1
+    </select>
+    <select id="countMenuCode" resultType="long">
+        SELECT COUNT(*) FROM sys_menu WHERE auth_code = #{code}
+    </select>
+    <select id="lockPermissionNamespace" resultType="java.lang.Long">
+        SELECT id FROM sys_role WHERE role_code = 'super_admin' FOR UPDATE
+    </select>
+    <update id="updateDetails">
+        UPDATE sys_permission SET menu_id = #{menuId}, title_key = #{title},
+               sort_order = #{sortOrder}, status = #{status} WHERE id = #{id}
+    </update>
+</mapper>
